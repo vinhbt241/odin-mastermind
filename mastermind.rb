@@ -3,19 +3,21 @@ require 'colorize'
 class Mastermind
   CIRCLE = "●"  
   HOLLOW_CIRCLE = "○"
+  CIRCLE_COLLECTION = [CIRCLE.black, CIRCLE.white, CIRCLE.red, CIRCLE.green, CIRCLE.blue, CIRCLE.yellow]
 
   def initialize()
     # init valriables for game
-    @board = Array.new(12) { [Array.new(4, HOLLOW_CIRCLE), Array.new(4, HOLLOW_CIRCLE)] }
+    @board = Array.new(6) { [Array.new(4, HOLLOW_CIRCLE), Array.new(4, HOLLOW_CIRCLE)] }
     @current_row = 0
-    @code = [CIRCLE.red, CIRCLE.white, CIRCLE.blue, CIRCLE.yellow]
+    @code = Array.new(4) { |circle| circle = CIRCLE_COLLECTION.sample }
     @stop_sign = false
     @victory_sign = false
     @display_message = "Type in your guess: "
 
     # Run game
-    system 'clear'
+    # system 'clear'
     until @stop_sign == true || @current_row >= @board.length || @victory_sign
+      @code.each { |c| print " #{c} " }
       puts "      MASTERMIND"
       build_board(@board)
       print @display_message
@@ -27,7 +29,7 @@ class Mastermind
         @victory_sign = true if check_vitory
         @current_row += 1
       end
-      system 'clear' 
+      # system 'clear' 
     end
     stop() if @stop_sign
     victory() if @victory_sign
@@ -92,20 +94,23 @@ class Mastermind
       correct_position: 0,
       wrong_position: 0
     }
+
     row_to_check = @board[@current_row][0]
+    code_to_guess = @code.dup
+
     row_to_check.each_with_index do |circle, index|
-      if @code.any?(circle)
+      puts  "code #{@code[index]}"
+      code_to_guess.each { |i| puts "Code to guess #{i}" }
+      if code_to_guess.any?(circle)
+        # BUG: ELEMENT WAS REMOVED BEFORE COMAPRE CORRECTLY
         if @code[index] == circle
           result[:correct_position] += 1
         else
           result[:wrong_position] += 1
         end 
 
-        num_circle_code = @code.count(circle)
-        num_cicrle_guess = row_to_check.count(circle)
-        invalid_circle = (num_circle_code - num_cicrle_guess).abs
-        result[:wrong_position] -= invalid_circle
-        result[:wrong_position] = 0 if result[:wrong_position] < 0
+        index_to_del = code_to_guess.index(circle)
+        code_to_guess.delete_at(index_to_del)
 
       end
     end
