@@ -5,40 +5,54 @@ class Mastermind
   HOLLOW_CIRCLE = "○"
 
   def initialize()
-    @board = [Array.new(4, HOLLOW_CIRCLE), Array.new(4, HOLLOW_CIRCLE)]
+    # init valriables for game
+    @board = Array.new(12) { [Array.new(4, HOLLOW_CIRCLE), Array.new(4, HOLLOW_CIRCLE)] }
+    @current_row = 0
+    @code = [CIRCLE.red, CIRCLE.white, CIRCLE.blue, CIRCLE.yellow]
+    @stop_sign = false
+    @victory_sign = false
     @display_message = "Type in your guess: "
+
+    # Run game
     system 'clear'
-    until stop?()
+    until @stop_sign == true || @current_row >= @board.length || @victory_sign
       puts "      MASTERMIND"
       build_board(@board)
       print @display_message
       input = gets.chomp
       get_input(input)
-      if board_filled?()
-        #check with result
-        @stop_sign = true
+      if row_filled?(0)
+        check_result()
+        @victory_sign = true if row_filled?(1)
+        @current_row += 1
       end
       system 'clear' 
     end
+    stop() if @stop_sign
+    victory() if @victory_sign
+    puts "GAME OVER"
   end
 
   private
 
   def build_board(board)
-    frame_up = "╔═════════╦═════════╗\n" 
-    frame_down = "╚═════════╩═════════╝\n"
-    display_guess = board[0].map { |c| " #{c}" }.join("")
-    display_result = board[1].map { |c| " #{c}" }.join("")
-    frame_side = "║" + display_guess + " ║" + display_result + " ║\n"
-    print frame_up + frame_side + frame_down
+    frame = ""
+    board.each_with_index do |row, index|
+      frame += "╔═════════╦═════════╗\n" if index == 0
+      display_guess = row[0].map { |c| " #{c}" }.join("")
+      display_result = row[1].map { |c| " #{c}" }.join("")
+      frame += "║" + display_guess + " ║" + display_result + " ║\n"
+      if index == board.length - 1
+        frame += "╚═════════╩═════════╝\n"
+      else
+        frame += "╠═════════╬═════════╣\n"
+      end
+    end
+    print frame
   end 
 
-  def stop?()
-    if @stop_sign == true
-      puts "GAME OVER"
-      return true
-    end
-    false
+  def stop()
+    puts "GAME HAS BEEN STOPPED"
   end
 
   def get_input(input)
@@ -54,22 +68,69 @@ class Mastermind
 
   def process_input(choice)
     i = 0
-    until @board[0][i] == HOLLOW_CIRCLE
+    until @board[@current_row][0][i] == HOLLOW_CIRCLE
       i += 1
     end 
     case choice
-    when "black" then @board[0][i] = CIRCLE.black
-    when "white" then @board[0][i] = CIRCLE.white
-    when "red" then @board[0][i] = CIRCLE.red
-    when "green" then @board[0][i] = CIRCLE.green
-    when "blue" then @board[0][i] = CIRCLE.blue
-    when "yellow" then @board[0][i] = CIRCLE.yellow
+    when "black" then @board[@current_row][0][i] = CIRCLE.black
+    when "white" then @board[@current_row][0][i] = CIRCLE.white
+    when "red" then @board[@current_row][0][i] = CIRCLE.red
+    when "green" then @board[@current_row][0][i] = CIRCLE.green
+    when "blue" then @board[@current_row][0][i] = CIRCLE.blue
+    when "yellow" then @board[@current_row][0][i] = CIRCLE.yellow
     end
   end
 
-  def board_filled?()
-    return false if @board[0].any?(HOLLOW_CIRCLE)
+  def row_filled?(index)
+    return false if @board[@current_row][index].any?(HOLLOW_CIRCLE)
     true
+  end
+
+  def check_result()
+    result = {
+      correct_position: 0,
+      wrong_position: 0
+    }
+    row_to_check = @board[@current_row][0]
+    row_to_check.each_with_index do |circle, index|
+      if @code.any?(circle)
+        if @code[index] == circle
+          result[:correct_position] += 1
+        else
+          result[:wrong_position] += 1
+        end 
+
+        num_circle_code = @code.count(circle)
+        num_cicrle_guess = row_to_check.count(circle)
+        invalid_circle = (num_circle_code - num_cicrle_guess).abs
+        result[:wrong_position] -= invalid_circle
+        result[:wrong_position] = 0 if result[:wrong_position] < 0
+
+      end
+    end
+    process_result(result)
+
+  end
+
+  def process_result(result)
+    index_display = 0
+    result.each do |position| 
+      symbol = position[0]
+      quantity = position[1]
+      while quantity > 0
+        if symbol == :correct_position
+          @board[@current_row][1][index_display] = CIRCLE.red
+        else
+          @board[@current_row][1][index_display] = CIRCLE.white
+        end
+        index_display += 1
+        quantity -= 1
+      end
+    end
+  end
+
+  def victory()
+    puts "CONGRATULATION, YOU WON!"
   end
 
 end
