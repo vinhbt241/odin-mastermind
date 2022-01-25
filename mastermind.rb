@@ -15,7 +15,7 @@ class Mastermind
     @display_message = "Type in your guess: "
 
     # Run game
-    # system 'clear'
+    system 'clear'
     until @stop_sign == true || @current_row >= @board.length || @victory_sign
       @code.each { |c| print " #{c} " }
       puts "      MASTERMIND"
@@ -29,7 +29,7 @@ class Mastermind
         @victory_sign = true if check_vitory
         @current_row += 1
       end
-      # system 'clear' 
+      system 'clear' 
     end
     stop() if @stop_sign
     victory() if @victory_sign
@@ -95,22 +95,19 @@ class Mastermind
       wrong_position: 0
     }
 
-    row_to_check = @board[@current_row][0]
+    row_to_check = @board[@current_row][0].dup
     code_to_guess = @code.dup
 
-    row_to_check.each_with_index do |circle, index|
-      puts  "code #{@code[index]}"
-      code_to_guess.each { |i| puts "Code to guess #{i}" }
-      if code_to_guess.any?(circle)
-        # BUG: ELEMENT WAS REMOVED BEFORE COMAPRE CORRECTLY
-        if @code[index] == circle
+    code_to_guess.each_with_index do |circle, index|
+      if row_to_check.any?(circle)
+        if @board[@current_row][0][index] == circle
           result[:correct_position] += 1
         else
           result[:wrong_position] += 1
         end 
 
-        index_to_del = code_to_guess.index(circle)
-        code_to_guess.delete_at(index_to_del)
+        index_to_del = row_to_check.index(circle)
+        row_to_check.delete_at(index_to_del)
 
       end
     end
