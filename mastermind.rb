@@ -23,7 +23,8 @@ class Mastermind
       get_input(input)
       if row_filled?(0)
         check_result()
-        @victory_sign = true if row_filled?(1)
+        check_vitory = row_filled?(1) && @board[@current_row][1].all?(CIRCLE.red)
+        @victory_sign = true if check_vitory
         @current_row += 1
       end
       system 'clear' 
