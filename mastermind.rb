@@ -6,6 +6,12 @@ class Mastermind
   CIRCLE_COLLECTION = [CIRCLE.black, CIRCLE.white, CIRCLE.red, CIRCLE.green, CIRCLE.blue, CIRCLE.yellow]
 
   def initialize()
+    #Code maker mode
+    
+    #End of code maker mode
+
+    # Code breaker mode
+
     # init valriables for game
     board_length = get_length()
     @board = Array.new(board_length) { [Array.new(4, HOLLOW_CIRCLE), Array.new(4, HOLLOW_CIRCLE)] }
@@ -19,7 +25,6 @@ class Mastermind
     system 'clear'
     until @stop_sign == true || @current_row >= @board.length || @victory_sign
       # @code.each { |c| print " #{c} " }
-      puts "      MASTERMIND"
       build_board(@board)
       print @display_message
       input = gets.chomp
@@ -32,15 +37,20 @@ class Mastermind
       end
       system 'clear' 
     end
+    build_board(@board)
     display_code()
     stop() if @stop_sign
     victory() if @victory_sign
     puts "GAME OVER"
+
+    #End of code breaker mode
+
   end
 
   private
 
   def build_board(board)
+    puts "      MASTERMIND"
     frame = ""
     board.each_with_index do |row, index|
       frame += "╔═════════╦═════════╗\n" if index == 0
@@ -113,14 +123,10 @@ class Mastermind
       if code_to_guess.any?(color)
         count_guess = code_to_guess.count(color)
         count_check = row_to_check.count(color)
-        if correct_positions[color] == 0
-          wrong_position = count_guess
+        if count_guess > count_check
+          wrong_position = count_check - correct_positions[color]
         else
-          if count_guess > count_check
-            wrong_position = count_check - correct_positions[color]
-          else
-            wrong_position = count_guess - correct_positions[color]
-          end
+          wrong_position = count_guess - correct_positions[color]
         end
          result[:wrong_position] += wrong_position
       end
