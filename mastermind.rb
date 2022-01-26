@@ -7,25 +7,10 @@ class Mastermind
 
   def initialize()
     # init valriables for game
-    puts ("How many guess do you want to take? (I personally suggest 12): ")
-    valid_length = false
-    until valid_length
-      board_length = gets.chomp
-      if (board_length.match?(/\d+/))
-        board_length = board_length.to_i
-        if board_length % 2 == 0
-          valid_length = true
-        else
-          puts "Invalid lenght, length must be even"
-        end
-      else
-        puts "Invalid input" 
-      end
-    end
+    board_length = get_length()
     @board = Array.new(board_length) { [Array.new(4, HOLLOW_CIRCLE), Array.new(4, HOLLOW_CIRCLE)] }
     @current_row = 0
     @code = Array.new(4) { |circle| circle = CIRCLE_COLLECTION.sample }
-    # @code = [CIRCLE.black, CIRCLE.black, CIRCLE.white, CIRCLE.red]
     @stop_sign = false
     @victory_sign = false
     @display_message = "Type in your guess: "
@@ -33,7 +18,7 @@ class Mastermind
     # Run game
     system 'clear'
     until @stop_sign == true || @current_row >= @board.length || @victory_sign
-      @code.each { |c| print " #{c} " }
+      # @code.each { |c| print " #{c} " }
       puts "      MASTERMIND"
       build_board(@board)
       print @display_message
@@ -47,6 +32,7 @@ class Mastermind
       end
       system 'clear' 
     end
+    display_code()
     stop() if @stop_sign
     victory() if @victory_sign
     puts "GAME OVER"
@@ -106,28 +92,42 @@ class Mastermind
   end
 
   def check_result()
+    correct_positions = Hash.new(0)
     result = {
       correct_position: 0,
       wrong_position: 0
     }
-
-    row_to_check = @board[@current_row][0].dup
     code_to_guess = @code.dup
+    row_to_check = @board[@current_row][0].dup
 
-    code_to_guess.each_with_index do |circle, index|
-      if row_to_check.any?(circle)
-        if @board[@current_row][0][index] == circle
-          result[:correct_position] += 1
-        else
-          result[:wrong_position] += 1
-        end 
-
-        index_to_del = row_to_check.index(circle)
-        row_to_check.delete_at(index_to_del)
-
+    row_to_check.each_with_index do |circle, index|
+      if @code[index] == circle
+        correct_positions[circle] += 1
       end
     end
+
+    correct_positions.each_value { |v| result[:correct_position] += v }
+
+    uniq_colors = row_to_check.uniq()
+    uniq_colors.each do |color|
+      if code_to_guess.any?(color)
+        count_guess = code_to_guess.count(color)
+        count_check = row_to_check.count(color)
+        if correct_positions[color] == 0
+          wrong_position = count_guess
+        else
+          if count_guess > count_check
+            wrong_position = count_check - correct_positions[color]
+          else
+            wrong_position = count_guess - correct_positions[color]
+          end
+        end
+         result[:wrong_position] += wrong_position
+      end
+    end
+    
     process_result(result)
+
   end
 
   def process_result(result)
@@ -149,6 +149,31 @@ class Mastermind
 
   def victory()
     puts "CONGRATULATION, YOU WON!"
+  end
+
+  def get_length()
+    ask = "How many guess do you want to take? (I personally suggest 12): "
+    while true
+      system 'clear'
+      puts ask
+      board_length = gets.chomp
+      if (board_length.match?(/\d+/))
+        board_length = board_length.to_i
+        if board_length % 2 == 0
+          return board_length
+        else
+          ask = "Invalid length, length must be even"
+        end
+      else
+        ask =  "Invalid input, input must be even number" 
+      end
+    end
+  end
+  
+  def display_code()
+    print "THE CORRECT CODE IS"
+    @code.each { |c| print " #{c} " }
+    print "\n"
   end
 
 end
