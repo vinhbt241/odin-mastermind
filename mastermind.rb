@@ -7,9 +7,25 @@ class Mastermind
 
   def initialize()
     # init valriables for game
-    @board = Array.new(6) { [Array.new(4, HOLLOW_CIRCLE), Array.new(4, HOLLOW_CIRCLE)] }
+    puts ("How many guess do you want to take? (I personally suggest 12): ")
+    valid_length = false
+    until valid_length
+      board_length = gets.chomp
+      if (board_length.match?(/\d+/))
+        board_length = board_length.to_i
+        if board_length % 2 == 0
+          valid_length = true
+        else
+          puts "Invalid lenght, length must be even"
+        end
+      else
+        puts "Invalid input" 
+      end
+    end
+    @board = Array.new(board_length) { [Array.new(4, HOLLOW_CIRCLE), Array.new(4, HOLLOW_CIRCLE)] }
     @current_row = 0
     @code = Array.new(4) { |circle| circle = CIRCLE_COLLECTION.sample }
+    # @code = [CIRCLE.black, CIRCLE.black, CIRCLE.white, CIRCLE.red]
     @stop_sign = false
     @victory_sign = false
     @display_message = "Type in your guess: "
@@ -112,7 +128,6 @@ class Mastermind
       end
     end
     process_result(result)
-
   end
 
   def process_result(result)
