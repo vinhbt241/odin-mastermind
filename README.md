@@ -1,5 +1,5 @@
 # odin-mastermind
-To play the game, thou need no click this link and click Run: https://replit.com/@vinhbt241/odin-mastermind#mastermind.rb  
+To play the game, thou need to click this link and click Run: https://replit.com/@vinhbt241/odin-mastermind#mastermind.rb  
 
 There is 2 mode in this game:  
 
